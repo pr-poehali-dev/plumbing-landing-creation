@@ -628,6 +628,9 @@ export default function Index() {
             <span className="font-display font-bold tracking-wider text-cyan">АКВА<span className="text-foreground">МАСТЕР</span></span>
           </div>
           <p className="text-sm text-muted-foreground text-center">© 2024 АкваМастер. Сантехнические услуги в Москве</p>
+          <a href="/admin" className="text-xs text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors font-display tracking-widest uppercase">
+            Админ
+          </a>
           <div className="flex flex-wrap gap-5">
             {NAV_LINKS.map((l) => (
               <a key={l.href} href={l.href} className="text-xs font-display tracking-widest uppercase text-muted-foreground hover:text-cyan transition-colors">

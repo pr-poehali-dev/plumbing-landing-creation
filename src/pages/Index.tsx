@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
 
+const PORTFOLIO_LIST_URL = "https://functions.poehali.dev/8af98359-a4c4-482e-97a1-b5b093139d65";
+
 const NAV_LINKS = [
   { label: "Услуги", href: "#services" },
   { label: "Преимущества", href: "#advantages" },
@@ -131,6 +133,7 @@ export default function Index() {
   const [submitted, setSubmitted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [dbPhotos, setDbPhotos] = useState<{ id: number; title: string; image_url: string; tag: string; area: string; duration: string }[]>([]);
 
   const servicesSection = useInView();
   const advantagesSection = useInView();
@@ -142,6 +145,13 @@ export default function Index() {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    fetch(PORTFOLIO_LIST_URL)
+      .then((r) => r.json())
+      .then((d) => { if (d.photos?.length) setDbPhotos(d.photos); })
+      .catch(() => {});
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -381,39 +391,52 @@ export default function Index() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {PORTFOLIO.map((p, i) => (
-              <div
-                key={p.title}
-                className={`group relative bg-card border border-border rounded-2xl overflow-hidden transition-all duration-500 hover:border-cyan/40 hover:-translate-y-1
-                  ${portfolioSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
-                style={{ transitionDelay: `${i * 80}ms` }}
-              >
-                <div className="h-48 bg-gradient-to-br from-secondary to-background relative flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 grid-pattern opacity-60" />
-                  <div className="relative z-10 w-20 h-20 rounded-2xl bg-cyan/10 border border-cyan/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                    <Icon name="Wrench" size={36} className="text-cyan opacity-60" />
-                  </div>
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-cyan/20 border border-cyan/30 text-cyan text-xs font-display tracking-widest uppercase px-3 py-1 rounded-full">
-                      {p.tag}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="font-display text-lg font-semibold mb-3 tracking-wide">{p.title}</h3>
-                  <div className="flex gap-6">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Icon name="Maximize2" size={14} className="text-cyan" />
-                      {p.area}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Icon name="Clock" size={14} className="text-cyan" />
-                      {p.duration}
+            {(dbPhotos.length > 0 ? dbPhotos : PORTFOLIO).map((p, i) => {
+              const imageUrl = (p as { image_url?: string }).image_url;
+              return (
+                <div
+                  key={p.title + i}
+                  className={`group relative bg-card border border-border rounded-2xl overflow-hidden transition-all duration-500 hover:border-cyan/40 hover:-translate-y-1
+                    ${portfolioSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+                  style={{ transitionDelay: `${i * 80}ms` }}
+                >
+                  <div className="h-48 bg-gradient-to-br from-secondary to-background relative flex items-center justify-center overflow-hidden">
+                    {imageUrl ? (
+                      <img src={imageUrl} alt={p.title} className="absolute inset-0 w-full h-full object-cover" />
+                    ) : (
+                      <>
+                        <div className="absolute inset-0 grid-pattern opacity-60" />
+                        <div className="relative z-10 w-20 h-20 rounded-2xl bg-cyan/10 border border-cyan/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                          <Icon name="Wrench" size={36} className="text-cyan opacity-60" />
+                        </div>
+                      </>
+                    )}
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="bg-cyan/20 border border-cyan/30 text-cyan text-xs font-display tracking-widest uppercase px-3 py-1 rounded-full backdrop-blur-sm">
+                        {p.tag}
+                      </span>
                     </div>
                   </div>
+                  <div className="p-6">
+                    <h3 className="font-display text-lg font-semibold mb-3 tracking-wide">{p.title}</h3>
+                    <div className="flex gap-6">
+                      {p.area && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Icon name="Maximize2" size={14} className="text-cyan" />
+                          {p.area}
+                        </div>
+                      )}
+                      {p.duration && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Icon name="Clock" size={14} className="text-cyan" />
+                          {p.duration}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

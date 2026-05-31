@@ -1,0 +1,11 @@
+{
+  "tests": [
+    {
+      "name": "Unauthorized request returns 401",
+      "method": "POST",
+      "path": "/",
+      "body": {"title": "Test"},
+      "expectedStatus": 401
+    }
+  ]
+}
